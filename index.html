@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>月下繁花 - 鲜花统计</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
+        }
+        body {
+            background-color: #f5f0f8;
+            color: #333;
+            padding-bottom: 80px;
+        }
+        .nav {
+            display: flex;
+            background-color: #9d65c9;
+            color: white;
+            padding: 12px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            justify-content: space-around;
+            z-index: 999;
+        }
+        .nav-item {
+            text-align: center;
+            cursor: pointer;
+        }
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .page {
+            display: none;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+        .page.active {
+            display: block;
+        }
+        .title-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #9d65c9;
+        }
+        .title-btn {
+            background-color: #9d65c9;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+        .search-btn {
+            background-color: #9d65c9;
+            color: white;
+            border: none;
+            padding: 0 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .filter-group {
+            margin-bottom: 16px;
+        }
+        .filter-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .filter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .filter-tag {
+            padding: 6px 12px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .filter-tag.active {
+            background-color: #9d65c9;
+            color: white;
+            border-color: #9d65c9;
+        }
+        .flower-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .flower-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            position: relative;
+        }
+        .flower-img {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 8px;
+            background-color: #f0e6f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9d65c9;
+            overflow: hidden;
+        }
+        .flower-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .flower-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .flower-score {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .flower-owner {
+            font-size: 11px;
+            color: #999;
+            margin-top: 6px;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+        .form-item {
+            margin-bottom: 16px;
+        }
+        .form-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+        .btn {
+            background-color: #9d65c9;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 8px;
+        }
+        .btn-outline {
+            background-color: white;
+            color: #9d65c9;
+            border: 1px solid #9d65c9;
+        }
+        .flower-checkbox {
+            margin-top: 8px;
+            accent-color: #9d65c9;
+        }
+        .admin-form {
+            background-color: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        #imagePreview {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 8px 0;
+            display: none;
+        }
+        .card-btn-group {
+            margin-top:6px;
+            display:flex;
+            gap:6px;
+            justify-content:center;
+        }
+        .card-btn {
+            font-size:12px;
+            padding:2px 8px;
+            border-radius:4px;
+            border:none;
+            cursor:pointer;
+        }
+        .edit-btn {
+            background:#e6f4ff;
+            color:#1890ff;
+        }
+        .del-btn {
+            background:#fff2f2;
+            color:#f5222d;
+        }
+        /* 成员列表样式 */
+        .member-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .member-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #f0e6f5;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .member-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .member-info {
+            flex: 1;
+        }
+        .member-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .member-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .member-count {
+            background: #9d65c9;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .member-nick {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        .member-flowers {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.4;
+        }
+        .member-del-btn {
+            background: #fff2f2;
+            color: #f5222d;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="nav">
+    <div class="nav-item" onclick="switchPage('index-page')">
+        <i class="fa-solid fa-book"></i>
+        <div>鲜花图鉴</div>
+    </div>
+    <div class="nav-item" onclick="switchPage('user-center')">
+        <i class="fa-solid fa-user"></i>
+        <div>个人中心</div>
+    </div>
+    <div class="nav-item" onclick="goAdmin()">
+        <i class="fa-solid fa-cog"></i>
+        <div>管理</div>
+    </div>
+</div>
+
+<div class="page active" id="index-page">
+    <div class="title">月下繁花鲜花图鉴</div>
+    <div class="search-box">
+        <input type="text" class="search-input" id="flower-search" placeholder="搜索鲜花">
+        <button class="search-btn" onclick="searchFlower()">搜索</button>
+    </div>
+    <div class="filter-group">
+        <div class="filter-title">竞赛分</div>
+        <div class="filter-tags" id="score-filter">
+            <div class="filter-tag active" data-score="all">全部</div>
+            <div class="filter-tag" data-score="9">9</div>
+            <div class="filter-tag" data-score="14">14</div>
+            <div class="filter-tag" data-score="21">21</div>
+            <div class="filter-tag" data-score="23">23</div>
+            <div class="filter-tag" data-score="25">25</div>
+            <div class="filter-tag" data-score="28">28</div>
+            <div class="filter-tag" data-score="30">30</div>
+            <div class="filter-tag" data-score="other">其他</div>
+        </div>
+    </div>
+    <div class="filter-group">
+        <div class="filter-title">颜色分类</div>
+        <div class="filter-tags" id="color-filter">
+            <div class="filter-tag active" data-color="all">全部</div>
+            <div class="filter-tag" data-color="red">红色</div>
+            <div class="filter-tag" data-color="gold">金色</div>
+            <div class="filter-tag" data-color="purple">紫色</div>
+            <div class="filter-tag" data-color="blue">蓝色</div>
+            <div class="filter-tag" data-color="green">绿色</div>
+        </div>
+    </div>
+    <div class="flower-list" id="flower-list"></div>
+</div>
+
+<div class="page" id="user-center">
+    <div class="title">个人中心</div>
+    <div class="form-item">
+        <label class="form-label">游戏ID</label>
+        <input type="text" class="form-input" id="game-id">
+    </div>
+    <div class="form-item">
+        <label class="form-label">群备注</label>
+        <input type="text" class="form-input" id="group-nick">
+    </div>
+    <div class="form-item">
+        <label class="form-label">拥有鲜花总数</label>
+        <input type="number" class="form-input" id="flower-total" readonly>
+    </div>
+    <button class="btn" onclick="saveUserInfo()">保存信息</button>
+    <button class="btn btn-outline" style="margin-top:12px" onclick="switchPage('flower-edit')">管理我的鲜花</button>
+</div>
+
+<div class="page" id="flower-edit">
+    <div class="title">我的鲜花</div>
+    <div class="search-box">
+        <input type="text" class="search-input" id="edit-flower-search" placeholder="搜索鲜花">
+        <button class="search-btn" onclick="searchEditFlower()">搜索</button>
+    </div>
+    <div class="filter-group">
+        <div class="filter-tags" id="edit-color-filter">
+            <div class="filter-tag active" data-color="all">全部</div>
+            <div class="filter-tag" data-color="red">红花</div>
+            <div class="filter-tag" data-color="green">绿花</div>
+            <div class="filter-tag" data-color="blue">蓝花</div>
+            <div class="filter-tag" data-color="purple">紫花</div>
+            <div class="filter-tag" data-color="gold">金花</div>
+        </div>
+    </div>
+    <div class="flower-list" id="edit-flower-list"></div>
+    <button class="btn" onclick="saveMyFlowers()">保存选择</button>
+</div>
+
+<div class="page" id="admin-page">
+    <div class="title-bar">
+        <div class="title">鲜花数据管理</div>
+        <button class="title-btn" onclick="switchPage('member-page')">查看成员</button>
+    </div>
+    <div class="admin-form">
+        <div class="form-item">
+            <label class="form-label">鲜花名称</label>
+            <input type="text" class="form-input" id="admin-flower-name">
+        </div>
+        <div class="form-item">
+            <label class="form-label">图片上传</label>
+            <input type="file" accept="image/*" class="form-input" id="imageUpload">
+            <img id="imagePreview">
+        </div>
+        <div class="form-item">
+            <label class="form-label">来源</label>
+            <input type="text" class="form-input" id="admin-flower-source">
+        </div>
+        <div class="form-item">
+            <label class="form-label">竞赛分数</label>
+            <select class="form-input" id="admin-flower-score">
+                <option value="9">9分</option>
+                <option value="14">14分</option>
+                <option value="21">21分</option>
+                <option value="23">23分</option>
+                <option value="25">25分</option>
+                <option value="28">28分</option>
+                <option value="30">30分</option>
+            </select>
+        </div>
+        <div class="form-item">
+            <label class="form-label">颜色</label>
+            <select class="form-input" id="admin-flower-color">
+                <option value="red">红色</option>
+                <option value="green">绿色</option>
+                <option value="blue">蓝色</option>
+                <option value="purple">紫色</option>
+                <option value="gold">金色</option>
+            </select>
+        </div>
+        <input type="hidden" id="edit-flower-index" value="">
+        <button class="btn" onclick="saveFlowerData()">保存鲜花数据</button>
+    </div>
+
+    <div class="title">鲜花列表</div>
+    <div class="search-box">
+        <input type="text" class="search-input" id="admin-search-name" placeholder="按名称搜索">
+        <select id="admin-search-score" class="search-input" style="max-width:120px">
+            <option value="all">全部分数</option>
+            <option value="9">9分</option>
+            <option value="14">14分</option>
+            <option value="21">21分</option>
+            <option value="23">23分</option>
+            <option value="25">25分</option>
+            <option value="28">28分</option>
+            <option value="30">30分</option>
+        </select>
+        <button class="search-btn" onclick="renderAdminFlowerList()">搜索</button>
+    </div>
+
+    <div class="flower-list" id="admin-flower-list"></div>
+</div>
+
+<!-- 成员名册页面 -->
+<div class="page" id="member-page">
+    <div class="title-bar">
+        <div class="title">成员名册</div>
+        <button class="title-btn" onclick="switchPage('admin-page')">返回管理</button>
+    </div>
+    <div class="search-box">
+        <input type="text" class="search-input" id="member-search" placeholder="搜索成员昵称或游戏ID">
+        <button class="search-btn" onclick="renderMemberList()">搜索</button>
+    </div>
+    <div class="filter-title">会员列表（共 <span id="member-count">0</span> 人）</div>
+    <div id="member-list"></div>
+</div>
+
+<script>
+const ADMIN_PASSWORD = '998877';
+let currentImageBase64 = '';
+let cloudFlowerList = [];
+let cloudMembers = [];
+
+function initData() {
+    if (!localStorage.getItem('cloudFlowerList')) {
+        const defaultFlowers = [
+            { name: '白百合', image: '', source: '等级花', score: 9, color: 'green' },
+            { name: '黄郁金香', image: '', source: '活动获取', score: 14, color: 'gold' },
+            { name: '紫罗兰', image: '', source: '活动获取', score: 21, color: 'purple' },
+            { name: '粉玫瑰', image: '', source: '签到获取', score: 23, color: 'red' }
+        ];
+        localStorage.setItem('cloudFlowerList', JSON.stringify(defaultFlowers));
+    }
+    if (!localStorage.getItem('cloudMembers')) {
+        localStorage.setItem('cloudMembers', JSON.stringify([]));
+    }
+    if (!localStorage.getItem('userMyFlowers')) {
+        localStorage.setItem('userMyFlowers', JSON.stringify([]));
+    }
+    cloudFlowerList = JSON.parse(localStorage.getItem('cloudFlowerList')) || [];
+    cloudMembers = JSON.parse(localStorage.getItem('cloudMembers')) || [];
+}
+
+function goAdmin() {
+    const pwd = prompt('请输入管理密码：');
+    if (pwd === ADMIN_PASSWORD) {
+        switchPage('admin-page');
+    } else {
+        alert('密码错误！');
+    }
+}
+
+function switchPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    if (pageId === 'index-page') renderFlowerList();
+    if (pageId === 'user-center') loadUserInfo();
+    if (pageId === 'flower-edit') renderEditFlowerList();
+    if (pageId === 'admin-page') renderAdminFlowerList();
+    if (pageId === 'member-page') renderMemberList();
+}
+
+document.getElementById('imageUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        currentImageBase64 = e.target.result;
+        const preview = document.getElementById('imagePreview');
+        preview.src = currentImageBase64;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+});
+
+function renderFlowerList() {
+    const flowers = cloudFlowerList;
+    const score = document.querySelector('#score-filter .active').dataset.score;
+    const color = document.querySelector('#color-filter .active').dataset.color;
+    const key = document.getElementById('flower-search').value.toLowerCase();
+
+    const list = flowers.filter(f => {
+        const s = score === 'all' ? true : (score === 'other' ? ![9,14,21,23,25,28,30].includes(f.score) : f.score == score);
+        const c = color === 'all' || f.color === color;
+        const k = f.name.toLowerCase().includes(key);
+        return s && c && k;
+    });
+
+    const dom = document.getElementById('flower-list');
+    dom.innerHTML = '';
+    list.forEach(f => {
+        const owners = cloudMembers.filter(m => m.myFlowers && m.myFlowers.includes(f.name));
+        const ownerText = owners.length 
+            ? owners.map(item => item.gameId).join(' | ') 
+            : '暂无成员拥有';
+
+        dom.innerHTML += `
+        <div class="flower-card">
+            <div class="flower-img">
+                ${f.image ? `<img src="${f.image}" />` : f.name}
+            </div>
+            <div class="flower-name">${f.name}</div>
+            <div class="flower-score">${f.score}分 · ${getColorText(f.color)} · ${f.source}</div>
+            <div class="flower-owner">拥有：${ownerText}</div>
+        </div>`;
+    });
+}
+
+function searchFlower() { renderFlowerList(); }
+document.querySelectorAll('#score-filter .filter-tag, #color-filter .filter-tag').forEach(tag => {
+    tag.onclick = () => {
+        document.querySelectorAll('#'+tag.parentElement.id+' .filter-tag').forEach(t => t.classList.remove('active'));
+        tag.classList.add('active');
+        renderFlowerList();
+    }
+});
+
+function loadUserInfo() {
+    let userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+    const my = JSON.parse(localStorage.getItem('userMyFlowers')) || [];
+    document.getElementById('game-id').value = userInfo.gameId || '';
+    document.getElementById('group-nick').value = userInfo.groupNick || '';
+    document.getElementById('flower-total').value = my.length;
+}
+
+function saveUserInfo() {
+    const gameId = document.getElementById('game-id').value.trim();
+    const groupNick = document.getElementById('group-nick').value.trim();
+    if (!gameId || !groupNick) {
+        alert('游戏ID和群备注不能为空！');
+        return;
+    }
+
+    const myFlowers = JSON.parse(localStorage.getItem('userMyFlowers')) || [];
+    const userInfo = { gameId, groupNick };
+    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+
+    let members = JSON.parse(localStorage.getItem('cloudMembers')) || [];
+    const idx = members.findIndex(m => m.gameId === gameId);
+    const memberData = { gameId, groupNick, myFlowers, flowerTotal: myFlowers.length };
+
+    if (idx >= 0) members[idx] = memberData;
+    else members.push(memberData);
+
+    localStorage.setItem('cloudMembers', JSON.stringify(members));
+    cloudMembers = members;
+    alert('信息保存成功！');
+    renderFlowerList();
+}
+
+function renderEditFlowerList() {
+    const flowers = cloudFlowerList;
+    const my = JSON.parse(localStorage.getItem('userMyFlowers')) || [];
+    const color = document.querySelector('#edit-color-filter .active').dataset.color;
+    const key = document.getElementById('edit-flower-search').value.toLowerCase();
+
+    const list = flowers.filter(f => {
+        const c = color === 'all' || f.color === color;
+        const k = f.name.toLowerCase().includes(key);
+        return c && k;
+    });
+
+    const dom = document.getElementById('edit-flower-list');
+    dom.innerHTML = '';
+    list.forEach(f => {
+        dom.innerHTML += `
+        <div class="flower-card">
+            <div class="flower-img">
+                ${f.image ? `<img src="${f.image}" />` : f.name}
+            </div>
+            <div class="flower-name">${f.name}</div>
+            <input type="checkbox" class="flower-checkbox" data-name="${f.name}"
+                ${my.includes(f.name) ? 'checked' : ''} onchange="updateMyFlowers(this)">
+        </div>`;
+    });
+}
+
+function updateMyFlowers(checkbox) {
+    let my = JSON.parse(localStorage.getItem('userMyFlowers')) || [];
+    const name = checkbox.dataset.name;
+    if (checkbox.checked) {
+        if (!my.includes(name)) my.push(name);
+    } else {
+        my = my.filter(n => n !== name);
+    }
+    localStorage.setItem('userMyFlowers', JSON.stringify(my));
+    document.getElementById('flower-total').value = my.length;
+}
+
+function searchEditFlower() { renderEditFlowerList(); }
+document.querySelectorAll('#edit-color-filter .filter-tag').forEach(tag => {
+    tag.onclick = () => {
+        document.querySelectorAll('#edit-color-filter .filter-tag').forEach(t => t.classList.remove('active'));
+        tag.classList.add('active');
+        renderEditFlowerList();
+    }
+});
+
+function saveMyFlowers() {
+    alert('保存成功！');
+    switchPage('user-center');
+    renderFlowerList();
+}
+
+function renderAdminFlowerList() {
+    const keyword = document.getElementById('admin-search-name').value.toLowerCase();
+    const scoreVal = document.getElementById('admin-search-score').value;
+    
+    let list = cloudFlowerList.filter(item => {
+        const matchName = item.name.toLowerCase().includes(keyword);
+        const matchScore = scoreVal === 'all' || item.score == scoreVal;
+        return matchName && matchScore;
+    });
+
+    const dom = document.getElementById('admin-flower-list');
+    dom.innerHTML = '';
+    list.forEach((f, idx) => {
+        dom.innerHTML += `
+        <div class="flower-card">
+            <div class="flower-img">
+                ${f.image ? `<img src="${f.image}" />` : f.name}
+            </div>
+            <div class="flower-name">${f.name}</div>
+            <div class="flower-score">${f.score}分</div>
+            <div class="card-btn-group">
+                <button class="card-btn edit-btn" onclick="editFlower(${idx})">编辑</button>
+                <button class="card-btn del-btn" onclick="delFlower(${idx})">删除</button>
+            </div>
+        </div>`;
+    });
+}
+
+function editFlower(idx) {
+    const f = cloudFlowerList[idx];
+    document.getElementById('admin-flower-name').value = f.name;
+    document.getElementById('admin-flower-source').value = f.source;
+    document.getElementById('admin-flower-score').value = f.score;
+    document.getElementById('admin-flower-color').value = f.color;
+    document.getElementById('edit-flower-index').value = idx;
+    currentImageBase64 = f.image || '';
+    if(currentImageBase64){
+        document.getElementById('imagePreview').src = currentImageBase64;
+        document.getElementById('imagePreview').style.display = 'block';
+    }else{
+        document.getElementById('imagePreview').style.display = 'none';
+    }
+}
+
+function delFlower(idx) {
+    if(!confirm('确定删除？')) return;
+    cloudFlowerList.splice(idx,1);
+    localStorage.setItem('cloudFlowerList', JSON.stringify(cloudFlowerList));
+    renderAdminFlowerList();
+    renderFlowerList();
+    alert('删除成功');
+}
+
+function saveFlowerData() {
+    const name = document.getElementById('admin-flower-name').value.trim();
+    const source = document.getElementById('admin-flower-source').value.trim();
+    const score = document.getElementById('admin-flower-score').value;
+    const color = document.getElementById('admin-flower-color').value;
+    const editIdx = document.getElementById('edit-flower-index').value;
+
+    if (!name) {
+        alert('鲜花名称不能为空！');
+        return;
+    }
+
+    const item = { name, image: currentImageBase64, source, score: Number(score), color };
+
+    if(editIdx !== ''){
+        cloudFlowerList[editIdx] = item;
+    }else{
+        const existIdx = cloudFlowerList.findIndex(x => x.name === name);
+        if(existIdx > -1) cloudFlowerList[existIdx] = item;
+        else cloudFlowerList.push(item);
+    }
+
+    localStorage.setItem('cloudFlowerList', JSON.stringify(cloudFlowerList));
+    alert('保存成功！');
+
+    document.getElementById('admin-flower-name').value = '';
+    document.getElementById('admin-flower-source').value = '';
+    document.getElementById('edit-flower-index').value = '';
+    document.getElementById('imageUpload').value = '';
+    document.getElementById('imagePreview').style.display = 'none';
+    currentImageBase64 = '';
+
+    renderAdminFlowerList();
+    renderFlowerList();
+}
+
+// 成员名册功能
+function renderMemberList() {
+    const keyword = document.getElementById('member-search').value.toLowerCase();
+    let list = cloudMembers.filter(m => 
+        m.gameId.toLowerCase().includes(keyword) || 
+        m.groupNick.toLowerCase().includes(keyword)
+    );
+
+    document.getElementById('member-count').innerText = list.length;
+    const dom = document.getElementById('member-list');
+    dom.innerHTML = '';
+    list.forEach((m, idx) => {
+        const flowerText = m.myFlowers ? m.myFlowers.join('、') : '无';
+        dom.innerHTML += `
+        <div class="member-card">
+            <div class="member-avatar">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${m.gameId}" />
+            </div>
+            <div class="member-info">
+                <div class="member-top">
+                    <div class="member-name">${m.gameId}</div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <div class="member-count">${m.flowerTotal} 朵</div>
+                        <button class="member-del-btn" onclick="delMember(${idx})">删除</button>
+                    </div>
+                </div>
+                <div class="member-nick">${m.groupNick}</div>
+                <div class="member-flowers">${flowerText}</div>
+            </div>
+        </div>`;
+    });
+}
+
+function delMember(idx) {
+    if(!confirm('确定删除该成员吗？删除后首页将不再显示该成员的拥有记录')) return;
+    cloudMembers.splice(idx,1);
+    localStorage.setItem('cloudMembers', JSON.stringify(cloudMembers));
+    renderMemberList();
+    renderFlowerList();
+    alert('成员已删除！');
+}
+
+function getColorText(c) {
+    return { red:'红色',green:'绿色',blue:'蓝色',purple:'紫色',gold:'金色' }[c] || c;
+}
+
+window.onload = () => { initData(); renderFlowerList(); loadUserInfo(); }
+</script>
+</body>
+</html>
